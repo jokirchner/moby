@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"time"
 
 	"github.com/docker/distribution"
@@ -98,6 +99,15 @@ func NewV2Repository(
 		}
 	}
 
+	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: nil})
+	if err != nil {
+		return nil, foundVersion, fallbackError{
+			err:         err,
+			confirmedV2: foundVersion,
+			transportOK: true,
+		}
+	}
+
 	if authConfig.RegistryToken != "" {
 		passThruTokenHandler := &existingTokenHandler{token: authConfig.RegistryToken}
 		modifiers = append(modifiers, auth.NewAuthorizer(challengeManager, passThruTokenHandler))
@@ -114,6 +124,7 @@ func NewV2Repository(
 			Credentials: creds,
 			Scopes:      []auth.Scope{scope},
 			ClientID:    registry.AuthClientID,
+			Jar:         jar,
 		}
 		tokenHandler := auth.NewTokenHandlerWithOptions(tokenHandlerOptions)
 		basicHandler := auth.NewBasicHandler(creds)
@@ -130,7 +141,7 @@ func NewV2Repository(
 		}
 	}
 
-	repo, err = client.NewRepository(repoNameRef, endpoint.URL.String(), tr)
+	repo, err = client.NewRepository(repoNameRef, endpoint.URL.String(), tr, jar)
 	if err != nil {
 		err = fallbackError{
 			err:         err,
