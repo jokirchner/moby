@@ -1,6 +1,7 @@
 package registry // import "github.com/docker/docker/registry"
 
 import (
+	"golang.org/x/net/publicsuffix"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
@@ -181,7 +182,7 @@ func v2AuthHTTPClient(endpoint *url.URL, authTransport http.RoundTripper, modifi
 		return nil, foundV2, err
 	}
 
-	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: nil})
+	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -264,7 +265,7 @@ func PingV2Registry(endpoint *url.URL, transport http.RoundTripper) (challenge.M
 		}
 	)
 
-	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: nil})
+	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
 		logrus.Fatal(err)
 	}

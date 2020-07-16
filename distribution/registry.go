@@ -3,6 +3,7 @@ package distribution // import "github.com/docker/docker/distribution"
 import (
 	"context"
 	"fmt"
+	"golang.org/x/net/publicsuffix"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
@@ -99,7 +100,7 @@ func NewV2Repository(
 		}
 	}
 
-	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: nil})
+	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
 		return nil, foundVersion, fallbackError{
 			err:         err,
